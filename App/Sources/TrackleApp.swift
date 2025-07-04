@@ -4,7 +4,7 @@ import SwiftUI
 struct InjectionDemoApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView2()
         }
     }
 }

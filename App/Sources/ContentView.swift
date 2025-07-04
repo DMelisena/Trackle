@@ -8,6 +8,7 @@ struct ContentView: View {
                 .imageScale(.large)
                 .foregroundStyle(.mint) // modify 2
             Text("Hello, world!") // modify 1
+            Text("Hello, world!") // modify 1
         }
         .padding()
 //        .background(.brown) //modify 3
