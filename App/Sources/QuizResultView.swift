@@ -1,14 +1,13 @@
 import SwiftUI
 
-struct QuizResultsView: View {
+struct QuizResultView: View {
     @EnvironmentObject var quizViewModel: QuizViewModel
-    @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                if let lastResult = quizViewModel.quizResults.last {
+                if let lastResult = quizViewModel.lastQuizResult {
                     // Results Header
                     VStack(spacing: 10) {
                         Text("Quiz Complete!")
@@ -62,6 +61,7 @@ struct QuizResultsView: View {
                     // Action Buttons
                     VStack(spacing: 10) {
                         Button("Take Another Quiz") {
+                            quizViewModel.resetQuiz()
                             dismiss()
                         }
                         .frame(maxWidth: .infinity)
@@ -70,7 +70,7 @@ struct QuizResultsView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
 
-                        Button("View All Results") {
+                        Button("Exit") {
                             dismiss()
                         }
                         .frame(maxWidth: .infinity)
@@ -79,16 +79,34 @@ struct QuizResultsView: View {
                         .foregroundColor(.primary)
                         .cornerRadius(10)
                     }
+                } else {
+                    Text("No quiz results available")
+                        .font(.title)
+                        .foregroundColor(.secondary)
+
+                    Spacer()
+
+                    Button("Back to Quiz Selection") {
+                        dismiss()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
                 }
             }
             .padding()
             .navigationTitle("Results")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(
-                trailing: Button("Done") {
-                    dismiss()
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
                 }
-            )
+            }
         }
     }
 

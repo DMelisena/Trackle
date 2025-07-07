@@ -2,7 +2,6 @@ import SwiftUI
 
 struct QuizView: View {
     @EnvironmentObject var quizViewModel: QuizViewModel
-    @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) var dismiss
     @State private var showingResults = false
 
@@ -102,7 +101,7 @@ struct QuizView: View {
                             if quiz.currentQuestionIndex < quiz.questions.count - 1 {
                                 quizViewModel.nextQuestion()
                             } else {
-                                quizViewModel.finishQuiz(userId: authViewModel.currentUser?.username ?? "")
+                                quizViewModel.finishQuiz(userId: "guest")
                                 showingResults = true
                             }
                         }) {
@@ -119,15 +118,17 @@ struct QuizView: View {
             }
             .navigationTitle("Math Quiz")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(
-                leading: Button("Cancel") {
-                    dismiss()
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
                 }
-            )
-            .sheet(isPresented: $showingResults) {
-                QuizResultsView()
+            }
+            .fullScreenCover(isPresented: $showingResults) {
+                QuizResultView()
                     .environmentObject(quizViewModel)
-                    .environmentObject(authViewModel)
             }
         }
     }

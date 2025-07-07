@@ -2,19 +2,6 @@ import SwiftUI
 
 // MARK: - Data Models
 
-struct User: Identifiable, Codable {
-    let id = UUID()
-    var username: String
-    var password: String
-    var role: UserRole
-    var name: String
-}
-
-enum UserRole: String, CaseIterable, Codable {
-    case student = "Student"
-    case teacher = "Teacher"
-}
-
 struct MathQuestion: Identifiable, Codable {
     let id = UUID()
     var chapter: MathChapter
