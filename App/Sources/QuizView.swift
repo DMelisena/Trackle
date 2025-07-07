@@ -165,8 +165,8 @@ struct QuizView: View {
                     // Next/Finish Button
                     if quizViewModel.selectedAnswer != -1 {
                         Button(action: {
-                            quizViewModel.processAnswer()
-                            if !quizViewModel.quizPassed {
+                            let result = quizViewModel.processAnswer()
+                            if result.quizFinished && !result.quizPassed {
                                 showingResults = true
                             }
                         }) {
