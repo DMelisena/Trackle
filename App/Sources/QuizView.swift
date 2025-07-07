@@ -4,10 +4,60 @@ struct QuizView: View {
     @EnvironmentObject var quizViewModel: QuizViewModel
     @Environment(\.dismiss) var dismiss
     @State private var showingResults = false
+    @State private var selectedChapter: MathChapter = .algebra // Add selectedChapter state
 
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
+                // Custom Header
+                HStack {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    Spacer()
+                    Text("Math Quiz")
+                        .font(.headline)
+                    Spacer()
+                    // Placeholder to balance the layout if needed, or remove if not
+                    Text("        ") // Adjust spacing as needed
+                }
+                .padding(.horizontal)
+
+                // Chapter Selection (Instagram Story Style)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 15) {
+                        ForEach(MathChapter.allCases, id: \.self) {
+                            chapter in
+                            VStack {
+                                Circle()
+                                    .fill(selectedChapter == chapter ? Color.blue : Color.gray.opacity(0.3))
+                                    .frame(width: 60, height: 60)
+                                    .overlay(
+                                        Text(chapter.rawValue.prefix(1))
+                                            .font(.title2)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.white)
+                                    )
+                                    .overlay(
+                                        Circle()
+                                            .stroke(selectedChapter == chapter ? Color.blue : Color.clear, lineWidth: 3)
+                                    )
+                                    .onTapGesture {
+                                        selectedChapter = chapter
+                                        // Restart quiz with new chapter and current difficulty
+                                        quizViewModel.startQuiz(chapter: selectedChapter, difficulty: quizViewModel.currentQuiz?.questions.first?.difficulty ?? .easy)
+                                    }
+
+                                Text(chapter.rawValue)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.bottom, 10)
+
                 if let quiz = quizViewModel.currentQuiz {
                     // Progress Bar
                     VStack(spacing: 8) {
@@ -116,16 +166,7 @@ struct QuizView: View {
                     }
                 }
             }
-            .navigationTitle("Math Quiz")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
+            .navigationBarHidden(true) // Hide the default navigation bar
             .fullScreenCover(isPresented: $showingResults) {
                 QuizResultView()
                     .environmentObject(quizViewModel)

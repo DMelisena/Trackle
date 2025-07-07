@@ -30,22 +30,6 @@ struct QuizSelectionView: View {
                 .fontWeight(.semibold)
 
             VStack(spacing: 15) {
-                // Chapter Selection
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Chapter")
-                        .font(.headline)
-
-                    Picker("Chapter", selection: $selectedChapter) {
-                        ForEach(MathChapter.allCases, id: \.self) { chapter in
-                            Text(chapter.rawValue).tag(chapter)
-                        }
-                    }
-                    .pickerStyle(WheelPickerStyle())
-                    .frame(height: 120)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
-                }
-
                 // Difficulty Selection
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Difficulty")
@@ -71,7 +55,7 @@ struct QuizSelectionView: View {
             .shadow(radius: 2)
 
             // Question Count Preview
-            let questionCount = quizViewModel.mathQuestions.filter { $0.chapter == selectedChapter && $0.difficulty == selectedDifficulty }.count
+            let questionCount = quizViewModel.mathQuestions.filter { $0.difficulty == selectedDifficulty }.count
 
             Text("Available Questions: \(questionCount)")
                 .font(.subheadline)
@@ -81,7 +65,8 @@ struct QuizSelectionView: View {
 
             // Start Quiz Button
             Button("Start Quiz") {
-                quizViewModel.startQuiz(chapter: selectedChapter, difficulty: selectedDifficulty)
+                // Start with the first chapter by default, difficulty from selection
+                quizViewModel.startQuiz(chapter: MathChapter.allCases.first ?? .algebra, difficulty: selectedDifficulty)
                 showingQuiz = true
             }
             .frame(maxWidth: .infinity)
