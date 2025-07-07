@@ -32,7 +32,10 @@ struct ChapterSelectionView: View {
                     }
                 }
                 .onAppear(perform: loadUnlockedChapters)
-
+                .onChange(of: quizViewModel.lastQuizResult?.id) { _ in
+                    loadUnlockedChapters()
+                }
+                
                 Picker("Difficulty", selection: $selectedDifficulty) {
                     ForEach(Difficulty.allCases, id: \.self) { difficulty in
                         Text(difficulty.rawValue)

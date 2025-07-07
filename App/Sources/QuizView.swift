@@ -63,26 +63,6 @@ struct QuizView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
-
-                        // Show locked chapters as greyed out
-                        ForEach(Array(MathChapter.allCases.suffix(MathChapter.allCases.count - unlockedChapterIndex - 1)), id: \.self) { chapter in
-                            VStack {
-                                Circle()
-                                    .fill(Color.gray.opacity(0.2))
-                                    .frame(width: 60, height: 60)
-                                    .overlay(
-                                        VStack {
-                                            Image(systemName: "lock.fill")
-                                                .font(.title3)
-                                                .foregroundColor(.gray)
-                                        }
-                                    )
-
-                                Text(chapter.rawValue)
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                            }
-                        }
                     }
                     .padding(.horizontal)
                 }
@@ -185,14 +165,12 @@ struct QuizView: View {
                     // Next/Finish Button
                     if quizViewModel.selectedAnswer != -1 {
                         Button(action: {
-                            if quiz.currentQuestionIndex < quiz.questions.count - 1 {
-                                quizViewModel.nextQuestion()
-                            } else {
-                                quizViewModel.finishQuiz(userId: "guest")
+                            quizViewModel.processAnswer()
+                            if !quizViewModel.quizPassed {
                                 showingResults = true
                             }
                         }) {
-                            Text(quiz.currentQuestionIndex < quiz.questions.count - 1 ? "Next Question" : "Finish Quiz")
+                            Text("Continue")
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(Color.blue)
