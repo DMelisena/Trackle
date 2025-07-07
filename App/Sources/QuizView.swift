@@ -4,7 +4,7 @@ struct QuizView: View {
     @EnvironmentObject var quizViewModel: QuizViewModel
     @Environment(\.dismiss) var dismiss
     @State private var showingResults = false
-    @State private var selectedChapter: MathChapter = .algebra // Add selectedChapter state
+    @State private var selectedChapter: MathChapter = .algebra
 
     var body: some View {
         NavigationView {
@@ -18,25 +18,35 @@ struct QuizView: View {
                     Text("Math Quiz")
                         .font(.headline)
                     Spacer()
-                    // Placeholder to balance the layout if needed, or remove if not
-                    Text("        ") // Adjust spacing as needed
+                    Text("        ") // Balance spacing
                 }
                 .padding(.horizontal)
 
-                // Chapter Selection (Instagram Story Style)
+                // Chapter Selection (Instagram Story Style) - Only show unlocked chapters
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
-                        ForEach(MathChapter.allCases, id: \.self) {
-                            chapter in
+                        let unlockedChapterIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
+                        let unlockedChapters = Array(MathChapter.allCases.prefix(unlockedChapterIndex + 1))
+
+                        ForEach(unlockedChapters, id: \.self) { chapter in
                             VStack {
                                 Circle()
                                     .fill(selectedChapter == chapter ? Color.blue : Color.gray.opacity(0.3))
                                     .frame(width: 60, height: 60)
                                     .overlay(
-                                        Text(chapter.rawValue.prefix(1))
-                                            .font(.title2)
-                                            .fontWeight(.bold)
-                                            .foregroundColor(.primary)
+                                        VStack {
+                                            Text(chapter.rawValue.prefix(1))
+                                                .font(.title2)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.primary)
+
+                                            // Show checkmark if chapter is completed
+                                            if isChapterCompleted(chapter) {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .font(.caption2)
+                                                    .foregroundColor(.green)
+                                            }
+                                        }
                                     )
                                     .overlay(
                                         Circle()
@@ -53,12 +63,39 @@ struct QuizView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
+
+                        // Show locked chapters as greyed out
+                        ForEach(Array(MathChapter.allCases.suffix(MathChapter.allCases.count - unlockedChapterIndex - 1)), id: \.self) { chapter in
+                            VStack {
+                                Circle()
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(width: 60, height: 60)
+                                    .overlay(
+                                        VStack {
+                                            Image(systemName: "lock.fill")
+                                                .font(.title3)
+                                                .foregroundColor(.gray)
+                                        }
+                                    )
+
+                                Text(chapter.rawValue)
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                        }
                     }
                     .padding(.horizontal)
                 }
                 .padding(.bottom, 10)
 
                 if let quiz = quizViewModel.currentQuiz {
+                    // Set the selected chapter to match the current quiz
+                    let _ = DispatchQueue.main.async {
+                        if let currentChapter = quiz.questions.first?.chapter {
+                            selectedChapter = currentChapter
+                        }
+                    }
+
                     // Progress Bar
                     VStack(spacing: 8) {
                         HStack {
@@ -166,11 +203,19 @@ struct QuizView: View {
                     }
                 }
             }
-            .navigationBarHidden(true) // Hide the default navigation bar
+            .navigationBarHidden(true)
             .fullScreenCover(isPresented: $showingResults) {
                 QuizResultView()
                     .environmentObject(quizViewModel)
             }
         }
+    }
+
+    private func isChapterCompleted(_ chapter: MathChapter) -> Bool {
+        let unlockedChapterIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
+        if let chapterIndex = MathChapter.allCases.firstIndex(of: chapter) {
+            return chapterIndex < unlockedChapterIndex
+        }
+        return false
     }
 }

@@ -174,11 +174,19 @@ class QuizViewModel: ObservableObject {
         lastQuizResult = result
         selectedAnswer = -1
 
+        // Unlock next chapter if current chapter is completed successfully
         let allChapters = MathChapter.allCases
         if let currentIndex = allChapters.firstIndex(of: result.chapter) {
             let currentUnlockedIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
-            if currentIndex >= currentUnlockedIndex {
-                UserDefaults.standard.set(currentIndex + 1, forKey: "unlockedChapterIndex")
+
+            // Only unlock next chapter if:
+            // 1. This is the current unlocked chapter (not going back to previous)
+            // 2. Score is good enough (let's say at least 60% correct)
+            let passPercentage = (result.score * 100) / result.totalQuestions
+            if currentIndex == currentUnlockedIndex && passPercentage >= 60 {
+                let nextIndex = min(currentIndex + 1, allChapters.count - 1)
+                UserDefaults.standard.set(nextIndex, forKey: "unlockedChapterIndex")
+                NotificationCenter.default.post(name: .chapterUnlocked, object: nil)
             }
         }
     }

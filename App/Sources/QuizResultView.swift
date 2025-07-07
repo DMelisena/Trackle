@@ -14,9 +14,12 @@ struct QuizResultView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
 
-                        Text("Great job!")
+                        let percentage = (lastResult.score * 100) / lastResult.totalQuestions
+                        let passingScore = Int(Double(lastResult.totalQuestions) * 0.7)
+
+                        Text(lastResult.score >= passingScore ? "Great job! Chapter unlocked!" : "Keep trying! You can do better!")
                             .font(.title2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(lastResult.score >= passingScore ? .green : .orange)
                     }
                     .padding(.top)
 
@@ -51,6 +54,9 @@ struct QuizResultView: View {
                         ResultRow(title: "Questions", value: "\(lastResult.totalQuestions)")
                         ResultRow(title: "Correct", value: "\(lastResult.score)")
                         ResultRow(title: "Time", value: formatTime(lastResult.timeSpent))
+
+                        let passingScore = Int(Double(lastResult.totalQuestions) * 0.7)
+                        ResultRow(title: "Status", value: lastResult.score >= passingScore ? "Passed ✅" : "Failed ❌")
                     }
                     .padding()
                     .background(Color.gray.opacity(0.1))
@@ -60,9 +66,15 @@ struct QuizResultView: View {
 
                     // Action Buttons
                     VStack(spacing: 10) {
-                        if let lastResult = quizViewModel.lastQuizResult,
+                        let passingScore = Int(Double(lastResult.totalQuestions) * 0.7)
+                        let unlockedChapterIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
+
+                        // Show next chapter button only if current chapter is passed and next chapter is unlocked
+                        if lastResult.score >= passingScore,
                            let currentIndex = MathChapter.allCases.firstIndex(of: lastResult.chapter),
-                           currentIndex + 1 < MathChapter.allCases.count {
+                           currentIndex + 1 < MathChapter.allCases.count,
+                           currentIndex + 1 <= unlockedChapterIndex
+                        {
                             Button("Next Chapter") {
                                 quizViewModel.startNextChapterQuiz()
                                 dismiss()
@@ -74,8 +86,8 @@ struct QuizResultView: View {
                             .cornerRadius(10)
                         }
 
-                        Button("Take Another Quiz") {
-                            quizViewModel.resetQuiz()
+                        Button("Retake Quiz") {
+                            quizViewModel.startQuiz(chapter: lastResult.chapter, difficulty: lastResult.difficulty)
                             dismiss()
                         }
                         .frame(maxWidth: .infinity)
@@ -84,7 +96,8 @@ struct QuizResultView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
 
-                        Button("Exit") {
+                        Button("Back to Home") {
+                            quizViewModel.resetQuiz()
                             dismiss()
                         }
                         .frame(maxWidth: .infinity)
@@ -100,7 +113,7 @@ struct QuizResultView: View {
 
                     Spacer()
 
-                    Button("Back to Quiz Selection") {
+                    Button("Back to Home") {
                         dismiss()
                     }
                     .frame(maxWidth: .infinity)
@@ -126,8 +139,8 @@ struct QuizResultView: View {
 
     private func scoreColor(_ percentage: Int) -> Color {
         switch percentage {
-        case 80 ... 100: return .green
-        case 60 ... 79: return .orange
+        case 70 ... 100: return .green
+        case 50 ... 69: return .orange
         default: return .red
         }
     }
