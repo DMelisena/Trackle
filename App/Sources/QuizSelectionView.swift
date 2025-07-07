@@ -72,7 +72,7 @@ struct QuizSelectionView: View {
             .frame(maxWidth: .infinity)
             .padding()
             .background(questionCount > 0 ? Color.blue : Color.gray)
-            .foregroundColor(.white)
+            .foregroundColor(.primary)
             .cornerRadius(10)
             .disabled(questionCount == 0)
 

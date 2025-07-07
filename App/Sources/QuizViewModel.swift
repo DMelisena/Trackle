@@ -173,11 +173,29 @@ class QuizViewModel: ObservableObject {
         quizResults.append(result)
         lastQuizResult = result
         selectedAnswer = -1
+
+        let allChapters = MathChapter.allCases
+        if let currentIndex = allChapters.firstIndex(of: result.chapter) {
+            let currentUnlockedIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
+            if currentIndex >= currentUnlockedIndex {
+                UserDefaults.standard.set(currentIndex + 1, forKey: "unlockedChapterIndex")
+            }
+        }
     }
 
     func resetQuiz() {
         currentQuiz = nil
         selectedAnswer = -1
         lastQuizResult = nil
+    }
+
+    func startNextChapterQuiz() {
+        guard let lastResult = lastQuizResult else { return }
+
+        let allChapters = MathChapter.allCases
+        if let currentIndex = allChapters.firstIndex(of: lastResult.chapter), currentIndex + 1 < allChapters.count {
+            let nextChapter = allChapters[currentIndex + 1]
+            startQuiz(chapter: nextChapter, difficulty: lastResult.difficulty)
+        }
     }
 }

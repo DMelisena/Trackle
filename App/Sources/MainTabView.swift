@@ -4,7 +4,7 @@ struct MainTabView: View {
     @EnvironmentObject var quizViewModel: QuizViewModel
 
     var body: some View {
-        QuizSelectionView()
+        ChapterSelectionView()
             .environmentObject(quizViewModel)
     }
 }

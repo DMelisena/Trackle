@@ -36,7 +36,7 @@ struct QuizView: View {
                                         Text(chapter.rawValue.prefix(1))
                                             .font(.title2)
                                             .fontWeight(.bold)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.primary)
                                     )
                                     .overlay(
                                         Circle()

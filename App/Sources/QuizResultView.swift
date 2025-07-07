@@ -60,6 +60,20 @@ struct QuizResultView: View {
 
                     // Action Buttons
                     VStack(spacing: 10) {
+                        if let lastResult = quizViewModel.lastQuizResult,
+                           let currentIndex = MathChapter.allCases.firstIndex(of: lastResult.chapter),
+                           currentIndex + 1 < MathChapter.allCases.count {
+                            Button("Next Chapter") {
+                                quizViewModel.startNextChapterQuiz()
+                                dismiss()
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+
                         Button("Take Another Quiz") {
                             quizViewModel.resetQuiz()
                             dismiss()
