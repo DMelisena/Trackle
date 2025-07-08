@@ -58,7 +58,7 @@ struct QuizResultView: View {
                     .padding()
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(12)
-                    
+
                     // Show newly unlocked chapters
                     let availableNextChapters = quizViewModel.getAvailableNextChapters()
                     if !availableNextChapters.isEmpty && lastResult.score == lastResult.totalQuestions {
@@ -66,7 +66,7 @@ struct QuizResultView: View {
                             Text("🎉 New Chapters Unlocked!")
                                 .font(.headline)
                                 .foregroundColor(.green)
-                            
+
                             ForEach(availableNextChapters, id: \.self) { chapter in
                                 Text("• \(chapter.rawValue)")
                                     .font(.subheadline)
@@ -95,4 +95,83 @@ struct QuizResultView: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
                             } else {
-                                Button("Choose Next Chapter
+                                Button("Choose Next Chapter") {
+                                    // Close results and let user choose from chapter selection
+                                    dismiss()
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                            }
+                        }
+
+                        // Retry Button (always show for failed attempts)
+                        if lastResult.score != lastResult.totalQuestions {
+                            Button("Try Again") {
+                                quizViewModel.startQuiz(chapter: lastResult.chapter)
+                                dismiss()
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+
+                        // Back to Home Button
+                        Button("Back to Home") {
+                            quizViewModel.resetQuiz()
+                            dismiss()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
+                } else {
+                    // Fallback if no result available
+                    VStack {
+                        Text("No results available")
+                            .font(.title)
+                            .foregroundColor(.secondary)
+
+                        Button("Back to Home") {
+                            dismiss()
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
+                }
+            }
+            .padding()
+            .navigationTitle("")
+            .navigationBarHidden(true)
+        }
+    }
+
+    // Helper function to determine score color
+    private func scoreColor(_ percentage: Int) -> Color {
+        switch percentage {
+        case 90 ... 100:
+            return .green
+        case 70 ... 89:
+            return .yellow
+        case 50 ... 69:
+            return .orange
+        default:
+            return .red
+        }
+    }
+
+    // Helper function to format time
+    private func formatTime(_ timeInterval: TimeInterval) -> String {
+        let minutes = Int(timeInterval) / 60
+        let seconds = Int(timeInterval) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+}

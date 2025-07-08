@@ -5,6 +5,7 @@ struct QuizView: View {
     @Environment(\.dismiss) var dismiss
     @State private var showingResults = false
     @State private var selectedChapter: MathChapter = .algebra
+    @State private var showingQuizComplete = false
 
     var body: some View {
         NavigationView {
@@ -166,11 +167,11 @@ struct QuizView: View {
                     if quizViewModel.selectedAnswer != -1 {
                         Button(action: {
                             let result = quizViewModel.processAnswer()
-                            if result.quizFinished, !result.quizPassed {
-                                showingResults = true
+                            if result.quizFinished {
+                                showingQuizComplete = true
                             }
                         }) {
-                            Text("Continue")
+                            Text(quiz.currentQuestionIndex == quiz.questions.count - 1 ? "Finish Quiz" : "Continue")
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(Color.blue)
@@ -179,10 +180,25 @@ struct QuizView: View {
                         }
                         .padding(.horizontal)
                     }
+                } else {
+                    // No quiz loaded state
+                    VStack {
+                        Text("No quiz loaded")
+                            .font(.title)
+                            .foregroundColor(.secondary)
+
+                        Button("Back to Home") {
+                            dismiss()
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
                 }
             }
             .navigationBarHidden(true)
-            .fullScreenCover(isPresented: $showingResults) {
+            .fullScreenCover(isPresented: $showingQuizComplete) {
                 QuizResultView()
                     .environmentObject(quizViewModel)
             }
