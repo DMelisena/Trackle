@@ -121,7 +121,7 @@ struct QuizView: View {
                             .padding()
                     }
                     .padding()
-                    .background(Color.white)
+                    .background(Color(UIColor.systemBackground))
                     .cornerRadius(12)
                     .shadow(radius: 2)
 
