@@ -25,7 +25,6 @@
     },
     {
         "chapter": "Geometry",
-        "difficulty": "Hard",
         "imageName": "geometry_hard",
         "question": "What is the volume of a sphere with radius 3?",
         "options": ["36π", "27π", "54π", "81π"],
@@ -41,7 +40,6 @@
     },
     {
         "chapter": "Calculus",
-        "difficulty": "Hard",
         "imageName": "calculus_hard",
         "question": "What is ∫ x² dx?",
         "options": ["x³/3 + C", "x³ + C", "2x + C", "x²/2 + C"],
@@ -81,7 +79,6 @@
     },
     {
         "chapter": "Algebra",
-        "difficulty": "Hard",
         "imageName": "algebra_hard_1",
         "question": "Solve for x: 2^(2x-1) = 8",
         "options": ["1", "2", "3", "4"],

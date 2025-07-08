@@ -5,8 +5,7 @@ import SwiftUI
 struct MathQuestion: Identifiable, Codable {
     let id = UUID()
     var chapter: MathChapter
-    var difficulty: Difficulty
-    var imageName: String
+    
     var question: String
     var options: [String]
     var correctAnswer: Int
@@ -20,17 +19,13 @@ enum MathChapter: String, CaseIterable, Codable {
     case trigonometry = "Trigonometry"
 }
 
-enum Difficulty: String, CaseIterable, Codable {
-    case easy = "Easy"
-    case medium = "Medium"
-    case hard = "Hard"
-}
+
 
 struct QuizResult: Identifiable, Codable {
     let id = UUID()
     var userId: String
     var chapter: MathChapter
-    var difficulty: Difficulty
+
     var score: Int
     var totalQuestions: Int
     var date: Date

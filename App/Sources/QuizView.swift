@@ -55,7 +55,7 @@ struct QuizView: View {
                                     .onTapGesture {
                                         selectedChapter = chapter
                                         // Restart quiz with new chapter and current difficulty
-                                        quizViewModel.startQuiz(chapter: selectedChapter, difficulty: quizViewModel.currentQuiz?.questions.first?.difficulty ?? .easy)
+                                        quizViewModel.startQuiz(chapter: selectedChapter)
                                     }
 
                                 Text(chapter.rawValue)

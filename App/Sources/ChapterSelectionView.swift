@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ChapterSelectionView: View {
     @EnvironmentObject var quizViewModel: QuizViewModel
-    @State private var selectedDifficulty: Difficulty = .easy
+    
     @State private var showingQuiz = false
     @State private var unlockedChapterIndex: Int = 0
 
@@ -13,7 +13,7 @@ struct ChapterSelectionView: View {
                 List(0 ..< (unlockedChapterIndex + 1), id: \.self) { index in
                     let chapter = MathChapter.allCases[index]
                     Button(action: {
-                        quizViewModel.startQuiz(chapter: chapter, difficulty: selectedDifficulty)
+                        quizViewModel.startQuiz(chapter: chapter)
                         showingQuiz = true
                     }) {
                         HStack {
@@ -36,13 +36,7 @@ struct ChapterSelectionView: View {
                     loadUnlockedChapters()
                 }
                 
-                Picker("Difficulty", selection: $selectedDifficulty) {
-                    ForEach(Difficulty.allCases, id: \.self) { difficulty in
-                        Text(difficulty.rawValue)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
+                
 
                 // Show progress
                 Text("Progress: \(unlockedChapterIndex + 1)/\(MathChapter.allCases.count) chapters")

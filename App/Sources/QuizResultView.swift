@@ -50,7 +50,7 @@ struct QuizResultView: View {
                     // Result Details
                     VStack(spacing: 15) {
                         ResultRow(title: "Chapter", value: lastResult.chapter.rawValue)
-                        ResultRow(title: "Difficulty", value: lastResult.difficulty.rawValue)
+                        
                         ResultRow(title: "Questions", value: "\(lastResult.totalQuestions)")
                         ResultRow(title: "Correct", value: "\(lastResult.score)")
                         ResultRow(title: "Time", value: formatTime(lastResult.timeSpent))
@@ -87,7 +87,7 @@ struct QuizResultView: View {
                         }
 
                         Button("Retake Quiz") {
-                            quizViewModel.startQuiz(chapter: lastResult.chapter, difficulty: lastResult.difficulty)
+                            quizViewModel.startQuiz(chapter: lastResult.chapter)
                             dismiss()
                         }
                         .frame(maxWidth: .infinity)

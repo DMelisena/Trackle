@@ -28,22 +28,20 @@ class QuizViewModel: ObservableObject {
         mathQuestions.append(question)
     }
 
-    func getResults(for userId: String, chapter: MathChapter? = nil, difficulty: Difficulty? = nil) -> [QuizResult] {
+    func getResults(for userId: String, chapter: MathChapter? = nil) -> [QuizResult] {
         var filteredResults = quizResults.filter { $0.userId == userId }
 
         if let chapter = chapter {
             filteredResults = filteredResults.filter { $0.chapter == chapter }
         }
 
-        if let difficulty = difficulty {
-            filteredResults = filteredResults.filter { $0.difficulty == difficulty }
-        }
+        
 
         return filteredResults.sorted { $0.date > $1.date }
     }
 
-    func startQuiz(chapter: MathChapter, difficulty: Difficulty) {
-        let filteredQuestions = mathQuestions.filter { $0.chapter == chapter && $0.difficulty == difficulty }
+    func startQuiz(chapter: MathChapter) {
+        let filteredQuestions = mathQuestions.filter { $0.chapter == chapter }
         currentQuiz = QuizSession(questions: filteredQuestions.shuffled())
         selectedAnswer = -1
         lastQuizResult = nil
@@ -98,7 +96,6 @@ class QuizViewModel: ObservableObject {
         let result = QuizResult(
             userId: userId,
             chapter: quiz.questions.first?.chapter ?? .algebra,
-            difficulty: quiz.questions.first?.difficulty ?? .easy,
             score: quiz.score,
             totalQuestions: quiz.questions.count,
             date: Date(),
@@ -135,7 +132,7 @@ class QuizViewModel: ObservableObject {
         let allChapters = MathChapter.allCases
         if let currentIndex = allChapters.firstIndex(of: lastResult.chapter), currentIndex + 1 < allChapters.count {
             let nextChapter = allChapters[currentIndex + 1]
-            startQuiz(chapter: nextChapter, difficulty: lastResult.difficulty)
+            startQuiz(chapter: nextChapter)
         } else {
             // Handle case where user has finished the last chapter
             // For now, we can just reset the quiz

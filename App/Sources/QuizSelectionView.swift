@@ -2,8 +2,6 @@ import SwiftUI
 
 struct QuizSelectionView: View {
     @EnvironmentObject var quizViewModel: QuizViewModel
-    @State private var selectedChapter: MathChapter = .algebra
-    @State private var selectedDifficulty: Difficulty = .easy
     @State private var showingQuiz = false
 
     var body: some View {
@@ -29,33 +27,8 @@ struct QuizSelectionView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            VStack(spacing: 15) {
-                // Difficulty Selection
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Difficulty")
-                        .font(.headline)
-
-                    Picker("Difficulty", selection: $selectedDifficulty) {
-                        ForEach(Difficulty.allCases, id: \.self) { difficulty in
-                            HStack {
-                                Text(difficulty.rawValue)
-                                Spacer()
-                                Image(systemName: difficultyIcon(difficulty))
-                                    .foregroundColor(difficultyColor(difficulty))
-                            }
-                            .tag(difficulty)
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                }
-            }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(radius: 2)
-
             // Question Count Preview
-            let questionCount = quizViewModel.mathQuestions.filter { $0.difficulty == selectedDifficulty }.count
+            let questionCount = quizViewModel.mathQuestions.count
 
             Text("Available Questions: \(questionCount)")
                 .font(.subheadline)
@@ -65,8 +38,8 @@ struct QuizSelectionView: View {
 
             // Start Quiz Button
             Button("Start Quiz") {
-                // Start with the first chapter by default, difficulty from selection
-                quizViewModel.startQuiz(chapter: MathChapter.allCases.first ?? .algebra, difficulty: selectedDifficulty)
+                // Start with the first chapter by default
+                quizViewModel.startQuiz(chapter: MathChapter.allCases.first ?? .algebra)
                 showingQuiz = true
             }
             .frame(maxWidth: .infinity)
@@ -77,7 +50,7 @@ struct QuizSelectionView: View {
             .disabled(questionCount == 0)
 
             if questionCount == 0 {
-                Text("No questions available for this combination")
+                Text("No questions available")
                     .font(.caption)
                     .foregroundColor(.red)
             }
@@ -90,22 +63,6 @@ struct QuizSelectionView: View {
         .fullScreenCover(isPresented: $showingQuiz) {
             QuizView()
                 .environmentObject(quizViewModel)
-        }
-    }
-
-    private func difficultyIcon(_ difficulty: Difficulty) -> String {
-        switch difficulty {
-        case .easy: return "circle"
-        case .medium: return "circle.fill"
-        case .hard: return "flame"
-        }
-    }
-
-    private func difficultyColor(_ difficulty: Difficulty) -> Color {
-        switch difficulty {
-        case .easy: return .green
-        case .medium: return .orange
-        case .hard: return .red
         }
     }
 }
