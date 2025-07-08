@@ -26,42 +26,41 @@ struct QuizView: View {
                 // Chapter Selection (Instagram Story Style) - Only show unlocked chapters
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
-                        let unlockedChapters = Array(quizViewModel.getUnlockedChapters())
-                        let completedChapters = quizViewModel.getCompletedChapters()
+                        ForEach(MathChapter.allCases, id: \.self) { chapter in
+                            if quizViewModel.getUnlockedChapters().contains(chapter) || quizViewModel.getCompletedChapters().contains(chapter) {
+                                VStack {
+                                    Circle()
+                                        .fill(selectedChapter == chapter ? Color.blue : Color.gray.opacity(0.3))
+                                        .frame(width: 60, height: 60)
+                                        .overlay(
+                                            VStack {
+                                                Text(chapter.rawValue.prefix(1))
+                                                    .font(.title2)
+                                                    .fontWeight(.bold)
+                                                    .foregroundColor(.primary)
 
-                        ForEach(unlockedChapters, id: \.self) { chapter in
-                            VStack {
-                                Circle()
-                                    .fill(selectedChapter == chapter ? Color.blue : Color.gray.opacity(0.3))
-                                    .frame(width: 60, height: 60)
-                                    .overlay(
-                                        VStack {
-                                            Text(chapter.rawValue.prefix(1))
-                                                .font(.title2)
-                                                .fontWeight(.bold)
-                                                .foregroundColor(.primary)
-
-                                            // Show checkmark if chapter is completed
-                                            if completedChapters.contains(chapter) {
-                                                Image(systemName: "checkmark.circle.fill")
-                                                    .font(.caption2)
-                                                    .foregroundColor(.green)
+                                                // Show checkmark if chapter is completed
+                                                if quizViewModel.getCompletedChapters().contains(chapter) {
+                                                    Image(systemName: "checkmark.circle.fill")
+                                                        .font(.caption2)
+                                                        .foregroundColor(.green)
+                                                }
                                             }
+                                        )
+                                        .overlay(
+                                            Circle()
+                                                .stroke(selectedChapter == chapter ? Color.blue : Color.clear, lineWidth: 3)
+                                        )
+                                        .onTapGesture {
+                                            selectedChapter = chapter
+                                            // Restart quiz with new chapter
+                                            quizViewModel.startQuiz(chapter: selectedChapter)
                                         }
-                                    )
-                                    .overlay(
-                                        Circle()
-                                            .stroke(selectedChapter == chapter ? Color.blue : Color.clear, lineWidth: 3)
-                                    )
-                                    .onTapGesture {
-                                        selectedChapter = chapter
-                                        // Restart quiz with new chapter
-                                        quizViewModel.startQuiz(chapter: selectedChapter)
-                                    }
 
-                                Text(chapter.rawValue)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    Text(chapter.rawValue)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                     }

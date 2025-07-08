@@ -14,17 +14,15 @@ struct QuizResultView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
 
-                        let percentage = (lastResult.score * 100) / lastResult.totalQuestions
-                        let isPassed = lastResult.score == lastResult.totalQuestions
+                        let passingScore = Int(Double(lastResult.totalQuestions) * 0.7)
 
-                        Text(isPassed ? "Perfect! New chapters unlocked!" : "Keep trying! You can do better!")
+                        Text(lastResult.score >= passingScore ? "Great job!" : "Keep trying! You can do better!")
                             .font(.title2)
-                            .foregroundColor(isPassed ? .green : .orange)
+                            .foregroundColor(lastResult.score >= passingScore ? .green : .orange)
                     }
                     .padding(.top)
 
                     // Score Circle
-                    let percentage = (lastResult.score * 100) / lastResult.totalQuestions
 
                     ZStack {
                         Circle()
@@ -32,13 +30,13 @@ struct QuizResultView: View {
                             .frame(width: 150, height: 150)
 
                         Circle()
-                            .trim(from: 0, to: CGFloat(percentage) / 100)
-                            .stroke(scoreColor(percentage), lineWidth: 10)
+                            .trim(from: 0, to: CGFloat(lastResult.percentage) / 100)
+                            .stroke(scoreColor(lastResult.percentage), lineWidth: 10)
                             .frame(width: 150, height: 150)
                             .rotationEffect(.degrees(-90))
 
                         VStack {
-                            Text("\(percentage)%")
+                            Text("\(lastResult.percentage)%")
                                 .font(.title)
                                 .fontWeight(.bold)
                             Text("\(lastResult.score)/\(lastResult.totalQuestions)")

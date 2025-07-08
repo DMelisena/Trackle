@@ -69,15 +69,14 @@ class QuizViewModel: ObservableObject {
 
     func getUnlockedChapters() -> Set<MathChapter> {
         let completedChapters = getCompletedChapters()
-        var unlockedChapters: Set<MathChapter> = []
+        var unlocked: Set<MathChapter> = [.algebra] // Algebra is always unlocked
 
-        for chapter in MathChapter.allCases {
-            if chapter.isUnlocked(completedChapters: completedChapters) {
-                unlockedChapters.insert(chapter)
+        for completedChapter in completedChapters {
+            for unlockedChapter in completedChapter.unlocks {
+                unlocked.insert(unlockedChapter)
             }
         }
-
-        return unlockedChapters
+        return unlocked
     }
 
     func getAvailableNextChapters() -> [MathChapter] {

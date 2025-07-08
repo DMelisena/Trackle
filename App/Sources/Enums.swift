@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Data Models
 
 struct MathQuestion: Identifiable, Codable {
-    let id = UUID()
+    var id = UUID()
     var chapter: MathChapter
     var difficulty: QuestionDifficulty?
     var imageName: String?
@@ -88,20 +88,7 @@ enum MathChapter: String, CaseIterable, Codable {
     case trigonometry = "Trigonometry"
 
     // Define chapter dependencies
-    var prerequisites: [MathChapter] {
-        switch self {
-        case .algebra:
-            return [] // No prerequisites - starting chapter
-        case .geometry:
-            return [.algebra]
-        case .calculus:
-            return [.algebra]
-        case .statistics:
-            return [.algebra]
-        case .trigonometry:
-            return [.geometry]
-        }
-    }
+
 
     // Define what chapters this chapter unlocks
     var unlocks: [MathChapter] {
@@ -116,9 +103,9 @@ enum MathChapter: String, CaseIterable, Codable {
     }
 
     // Check if this chapter is unlocked based on completed chapters
-    func isUnlocked(completedChapters: Set<MathChapter>) -> Bool {
-        return prerequisites.allSatisfy { completedChapters.contains($0) }
-    }
+//    func isUnlocked(completedChapters: Set<MathChapter>) -> Bool {
+
+//    }
 
     // Chapter icon
     var icon: String {
@@ -154,7 +141,7 @@ enum MathChapter: String, CaseIterable, Codable {
 }
 
 struct QuizResult: Identifiable, Codable {
-    let id = UUID()
+    var id = UUID()
     var userId: String
     var chapter: MathChapter
     var score: Int

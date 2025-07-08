@@ -13,29 +13,9 @@ struct ChapterSelectionView: View {
                 // Chapter Tree View
                 ScrollView {
                     VStack(spacing: 30) {
-                        // Algebra (Root)
-                        chapterRow(for: .algebra)
-                        
-                        // Second Level (Algebra unlocks these)
-                        HStack(spacing: 20) {
-                            VStack(spacing: 20) {
-                                chapterRow(for: .geometry)
-                                // Trigonometry (unlocked by Geometry)
-                                if unlockedChapters.contains(.trigonometry) || completedChapters.contains(.geometry) {
-                                    VStack {
-                                        // Connection line
-                                        Rectangle()
-                                            .fill(Color.gray.opacity(0.3))
-                                            .frame(width: 2, height: 20)
-                                        
-                                        chapterRow(for: .trigonometry)
-                                    }
-                                }
-                            }
-                            
-                            VStack(spacing: 20) {
-                                chapterRow(for: .calculus)
-                                chapterRow(for: .statistics)
+                        ForEach(MathChapter.allCases, id: \.self) { chapter in
+                            if unlockedChapters.contains(chapter) || completedChapters.contains(chapter) {
+                                chapterRow(for: chapter)
                             }
                         }
                     }
@@ -88,11 +68,7 @@ struct ChapterSelectionView: View {
                         .font(.headline)
                         .foregroundColor(unlockedChapters.contains(chapter) ? .primary : .secondary)
                     
-                    if !chapter.prerequisites.isEmpty {
-                        Text("Requires: \(chapter.prerequisites.map { $0.rawValue }.joined(separator: ", "))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+                    
                 }
                 
                 Spacer()
