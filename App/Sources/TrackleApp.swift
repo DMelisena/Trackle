@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct InjectionDemoApp: App {
+struct TrackleApp: App {
     init() {
         if UserDefaults.standard.object(forKey: "unlockedChapterIndex") == nil {
             UserDefaults.standard.set(0, forKey: "unlockedChapterIndex")
@@ -10,7 +10,7 @@ struct InjectionDemoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView2()
+            MainTabView()
         }
     }
 }
