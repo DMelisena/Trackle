@@ -15,11 +15,11 @@ struct QuizResultView: View {
                             .fontWeight(.bold)
 
                         let percentage = (lastResult.score * 100) / lastResult.totalQuestions
-                        let passingScore = Int(Double(lastResult.totalQuestions) * 0.7)
+                        let isPassed = lastResult.score == lastResult.totalQuestions
 
-                        Text(lastResult.score >= passingScore ? "Great job! Chapter unlocked!" : "Keep trying! You can do better!")
+                        Text(isPassed ? "Perfect! New chapters unlocked!" : "Keep trying! You can do better!")
                             .font(.title2)
-                            .foregroundColor(lastResult.score >= passingScore ? .green : .orange)
+                            .foregroundColor(isPassed ? .green : .orange)
                     }
                     .padding(.top)
 
@@ -50,104 +50,49 @@ struct QuizResultView: View {
                     // Result Details
                     VStack(spacing: 15) {
                         ResultRow(title: "Chapter", value: lastResult.chapter.rawValue)
-                        
                         ResultRow(title: "Questions", value: "\(lastResult.totalQuestions)")
                         ResultRow(title: "Correct", value: "\(lastResult.score)")
                         ResultRow(title: "Time", value: formatTime(lastResult.timeSpent))
-
-                        let passingScore = Int(Double(lastResult.totalQuestions) * 0.7)
-                        ResultRow(title: "Status", value: lastResult.score >= passingScore ? "Passed ✅" : "Failed ❌")
+                        ResultRow(title: "Status", value: lastResult.score == lastResult.totalQuestions ? "Passed ✅" : "Failed ❌")
                     }
                     .padding()
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(12)
+                    
+                    // Show newly unlocked chapters
+                    let availableNextChapters = quizViewModel.getAvailableNextChapters()
+                    if !availableNextChapters.isEmpty && lastResult.score == lastResult.totalQuestions {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("🎉 New Chapters Unlocked!")
+                                .font(.headline)
+                                .foregroundColor(.green)
+                            
+                            ForEach(availableNextChapters, id: \.self) { chapter in
+                                Text("• \(chapter.rawValue)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding()
+                        .background(Color.green.opacity(0.1))
+                        .cornerRadius(12)
+                    }
 
                     Spacer()
 
                     // Action Buttons
                     VStack(spacing: 10) {
-                        let passingScore = Int(Double(lastResult.totalQuestions) * 0.7)
-                        let unlockedChapterIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
-
-                        // Show next chapter button only if current chapter is passed and next chapter is unlocked
-                        if lastResult.score >= passingScore,
-                           let currentIndex = MathChapter.allCases.firstIndex(of: lastResult.chapter),
-                           currentIndex + 1 < MathChapter.allCases.count,
-                           currentIndex + 1 <= unlockedChapterIndex
-                        {
-                            Button("Next Chapter") {
-                                quizViewModel.startNextChapterQuiz()
-                                dismiss()
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.green)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                        }
-
-                        Button("Retake Quiz") {
-                            quizViewModel.startQuiz(chapter: lastResult.chapter)
-                            dismiss()
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-
-                        Button("Back to Home") {
-                            quizViewModel.resetQuiz()
-                            dismiss()
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.gray.opacity(0.2))
-                        .foregroundColor(.primary)
-                        .cornerRadius(10)
-                    }
-                } else {
-                    Text("No quiz results available")
-                        .font(.title)
-                        .foregroundColor(.secondary)
-
-                    Spacer()
-
-                    Button("Back to Home") {
-                        dismiss()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                }
-            }
-            .padding()
-            .navigationTitle("Results")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-
-    private func scoreColor(_ percentage: Int) -> Color {
-        switch percentage {
-        case 70 ... 100: return .green
-        case 50 ... 69: return .orange
-        default: return .red
-        }
-    }
-
-    private func formatTime(_ timeInterval: TimeInterval) -> String {
-        let minutes = Int(timeInterval) / 60
-        let seconds = Int(timeInterval) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-}
+                        // Show next chapter options if available
+                        if !availableNextChapters.isEmpty && lastResult.score == lastResult.totalQuestions {
+                            if availableNextChapters.count == 1 {
+                                Button("Start \(availableNextChapters.first!.rawValue)") {
+                                    quizViewModel.startQuiz(chapter: availableNextChapters.first!)
+                                    dismiss()
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                            } else {
+                                Button("Choose Next Chapter

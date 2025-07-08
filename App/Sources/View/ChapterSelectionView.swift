@@ -4,61 +4,150 @@ struct ChapterSelectionView: View {
     @EnvironmentObject var quizViewModel: QuizViewModel
     
     @State private var showingQuiz = false
-    @State private var unlockedChapterIndex: Int = 0
+    @State private var unlockedChapters: Set<MathChapter> = []
+    @State private var completedChapters: Set<MathChapter> = []
 
     var body: some View {
         NavigationView {
             VStack {
-                // Show only unlocked chapters
-                List(0 ..< (unlockedChapterIndex + 1), id: \.self) { index in
-                    let chapter = MathChapter.allCases[index]
-                    Button(action: {
-                        quizViewModel.startQuiz(chapter: chapter)
-                        showingQuiz = true
-                    }) {
-                        HStack {
-                            Text(chapter.rawValue)
-                                .font(.headline)
-                            Spacer()
-                            if index == unlockedChapterIndex {
-                                Image(systemName: "play.circle.fill")
-                                    .foregroundColor(.blue)
-                            } else {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
+                // Chapter Tree View
+                ScrollView {
+                    VStack(spacing: 30) {
+                        // Algebra (Root)
+                        chapterRow(for: .algebra)
+                        
+                        // Second Level (Algebra unlocks these)
+                        HStack(spacing: 20) {
+                            VStack(spacing: 20) {
+                                chapterRow(for: .geometry)
+                                // Trigonometry (unlocked by Geometry)
+                                if unlockedChapters.contains(.trigonometry) || completedChapters.contains(.geometry) {
+                                    VStack {
+                                        // Connection line
+                                        Rectangle()
+                                            .fill(Color.gray.opacity(0.3))
+                                            .frame(width: 2, height: 20)
+                                        
+                                        chapterRow(for: .trigonometry)
+                                    }
+                                }
+                            }
+                            
+                            VStack(spacing: 20) {
+                                chapterRow(for: .calculus)
+                                chapterRow(for: .statistics)
                             }
                         }
-                        .padding(.vertical, 8)
                     }
-                }
-                .onAppear(perform: loadUnlockedChapters)
-                .onChange(of: quizViewModel.lastQuizResult?.id) { _ in
-                    loadUnlockedChapters()
+                    .padding()
                 }
                 
-                
-
-                // Show progress
-                Text("Progress: \(unlockedChapterIndex + 1)/\(MathChapter.allCases.count) chapters")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.bottom)
+                // Progress Display
+                VStack(spacing: 10) {
+                    Text("Your Progress")
+                        .font(.headline)
+                    
+                    HStack {
+                        Text("Chapters Completed: \(completedChapters.count)/\(MathChapter.allCases.count)")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    
+                    ProgressView(value: Double(completedChapters.count), total: Double(MathChapter.allCases.count))
+                        .progressViewStyle(LinearProgressViewStyle(tint: .blue))
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                .padding(.horizontal)
             }
             .navigationTitle("Math Chapters")
+            .onAppear(perform: loadChapterStatus)
+            .onReceive(NotificationCenter.default.publisher(for: .chapterUnlocked)) { _ in
+                loadChapterStatus()
+            }
             .fullScreenCover(isPresented: $showingQuiz) {
                 QuizView()
                     .environmentObject(quizViewModel)
             }
-            .onReceive(NotificationCenter.default.publisher(for: .chapterUnlocked)) { _ in
-                loadUnlockedChapters()
+        }
+    }
+    
+    @ViewBuilder
+    private func chapterRow(for chapter: MathChapter) -> some View {
+        Button(action: {
+            if unlockedChapters.contains(chapter) {
+                quizViewModel.startQuiz(chapter: chapter)
+                showingQuiz = true
             }
+        }) {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(chapter.rawValue)
+                        .font(.headline)
+                        .foregroundColor(unlockedChapters.contains(chapter) ? .primary : .secondary)
+                    
+                    if !chapter.prerequisites.isEmpty {
+                        Text("Requires: \(chapter.prerequisites.map { $0.rawValue }.joined(separator: ", "))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Spacer()
+                
+                // Status Icon
+                if completedChapters.contains(chapter) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .font(.title2)
+                } else if unlockedChapters.contains(chapter) {
+                    Image(systemName: "play.circle.fill")
+                        .foregroundColor(.blue)
+                        .font(.title2)
+                } else {
+                    Image(systemName: "lock.circle.fill")
+                        .foregroundColor(.gray)
+                        .font(.title2)
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(chapterBackgroundColor(for: chapter))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(chapterBorderColor(for: chapter), lineWidth: 2)
+            )
+        }
+        .disabled(!unlockedChapters.contains(chapter))
+    }
+    
+    private func chapterBackgroundColor(for chapter: MathChapter) -> Color {
+        if completedChapters.contains(chapter) {
+            return Color.green.opacity(0.1)
+        } else if unlockedChapters.contains(chapter) {
+            return Color.blue.opacity(0.1)
+        } else {
+            return Color.gray.opacity(0.1)
+        }
+    }
+    
+    private func chapterBorderColor(for chapter: MathChapter) -> Color {
+        if completedChapters.contains(chapter) {
+            return Color.green.opacity(0.3)
+        } else if unlockedChapters.contains(chapter) {
+            return Color.blue.opacity(0.3)
+        } else {
+            return Color.gray.opacity(0.3)
         }
     }
 
-    func loadUnlockedChapters() {
-        unlockedChapterIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
-        // Ensure we don't go beyond available chapters
-        unlockedChapterIndex = min(unlockedChapterIndex, MathChapter.allCases.count - 1)
+    func loadChapterStatus() {
+        completedChapters = quizViewModel.getCompletedChapters()
+        unlockedChapters = quizViewModel.getUnlockedChapters()
     }
 }
 

@@ -25,8 +25,8 @@ struct QuizView: View {
                 // Chapter Selection (Instagram Story Style) - Only show unlocked chapters
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
-                        let unlockedChapterIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
-                        let unlockedChapters = Array(MathChapter.allCases.prefix(unlockedChapterIndex + 1))
+                        let unlockedChapters = Array(quizViewModel.getUnlockedChapters())
+                        let completedChapters = quizViewModel.getCompletedChapters()
 
                         ForEach(unlockedChapters, id: \.self) { chapter in
                             VStack {
@@ -41,7 +41,7 @@ struct QuizView: View {
                                                 .foregroundColor(.primary)
 
                                             // Show checkmark if chapter is completed
-                                            if isChapterCompleted(chapter) {
+                                            if completedChapters.contains(chapter) {
                                                 Image(systemName: "checkmark.circle.fill")
                                                     .font(.caption2)
                                                     .foregroundColor(.green)
@@ -54,7 +54,7 @@ struct QuizView: View {
                                     )
                                     .onTapGesture {
                                         selectedChapter = chapter
-                                        // Restart quiz with new chapter and current difficulty
+                                        // Restart quiz with new chapter
                                         quizViewModel.startQuiz(chapter: selectedChapter)
                                     }
 
@@ -166,7 +166,7 @@ struct QuizView: View {
                     if quizViewModel.selectedAnswer != -1 {
                         Button(action: {
                             let result = quizViewModel.processAnswer()
-                            if result.quizFinished && !result.quizPassed {
+                            if result.quizFinished, !result.quizPassed {
                                 showingResults = true
                             }
                         }) {
@@ -187,13 +187,5 @@ struct QuizView: View {
                     .environmentObject(quizViewModel)
             }
         }
-    }
-
-    private func isChapterCompleted(_ chapter: MathChapter) -> Bool {
-        let unlockedChapterIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
-        if let chapterIndex = MathChapter.allCases.firstIndex(of: chapter) {
-            return chapterIndex < unlockedChapterIndex
-        }
-        return false
     }
 }

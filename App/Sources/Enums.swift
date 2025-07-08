@@ -5,7 +5,7 @@ import SwiftUI
 struct MathQuestion: Identifiable, Codable {
     let id = UUID()
     var chapter: MathChapter
-    
+
     var question: String
     var options: [String]
     var correctAnswer: Int
@@ -17,9 +17,40 @@ enum MathChapter: String, CaseIterable, Codable {
     case calculus = "Calculus"
     case statistics = "Statistics"
     case trigonometry = "Trigonometry"
+
+    // Define chapter dependencies
+    var prerequisites: [MathChapter] {
+        switch self {
+        case .algebra:
+            return [] // No prerequisites - starting chapter
+        case .geometry:
+            return [.algebra]
+        case .calculus:
+            return [.algebra]
+        case .statistics:
+            return [.algebra]
+        case .trigonometry:
+            return [.geometry]
+        }
+    }
+
+    // Define what chapters this chapter unlocks
+    var unlocks: [MathChapter] {
+        switch self {
+        case .algebra:
+            return [.geometry, .calculus, .statistics]
+        case .geometry:
+            return [.trigonometry]
+        case .calculus, .statistics, .trigonometry:
+            return [] // These don't unlock additional chapters
+        }
+    }
+
+    // Check if this chapter is unlocked based on completed chapters
+    func isUnlocked(completedChapters: Set<MathChapter>) -> Bool {
+        return prerequisites.allSatisfy { completedChapters.contains($0) }
+    }
 }
-
-
 
 struct QuizResult: Identifiable, Codable {
     let id = UUID()

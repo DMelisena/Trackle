@@ -35,9 +35,33 @@ class QuizViewModel: ObservableObject {
             filteredResults = filteredResults.filter { $0.chapter == chapter }
         }
 
-        
-
         return filteredResults.sorted { $0.date > $1.date }
+    }
+
+    // Get completed chapters from UserDefaults
+    func getCompletedChapters() -> Set<MathChapter> {
+        let completedChaptersRaw = UserDefaults.standard.array(forKey: "completedChapters") as? [String] ?? []
+        return Set(completedChaptersRaw.compactMap { MathChapter(rawValue: $0) })
+    }
+
+    // Save completed chapters to UserDefaults
+    func saveCompletedChapters(_ chapters: Set<MathChapter>) {
+        let chaptersArray = Array(chapters).map { $0.rawValue }
+        UserDefaults.standard.set(chaptersArray, forKey: "completedChapters")
+    }
+
+    // Get all currently unlocked chapters
+    func getUnlockedChapters() -> Set<MathChapter> {
+        let completedChapters = getCompletedChapters()
+        var unlockedChapters: Set<MathChapter> = []
+
+        for chapter in MathChapter.allCases {
+            if chapter.isUnlocked(completedChapters: completedChapters) {
+                unlockedChapters.insert(chapter)
+            }
+        }
+
+        return unlockedChapters
     }
 
     func startQuiz(chapter: MathChapter) {
@@ -62,16 +86,13 @@ class QuizViewModel: ObservableObject {
         if lastAnswer == quiz.questions[quiz.currentQuestionIndex].correctAnswer {
             quiz.score += 1
             currentQuiz = quiz
-            
+
             if quiz.currentQuestionIndex < quiz.questions.count - 1 {
                 nextQuestion()
                 return (quizFinished: false, quizPassed: false)
             } else {
                 finishQuiz(userId: "guest")
-                let passed = self.quizPassed // Capture state before it's reset
-                if passed {
-                    startNextChapterQuiz()
-                }
+                let passed = quizPassed
                 return (quizFinished: true, quizPassed: passed)
             }
         } else {
@@ -106,15 +127,17 @@ class QuizViewModel: ObservableObject {
         lastQuizResult = result
         selectedAnswer = -1
 
+        // Check if quiz passed (100% required)
         if result.score == result.totalQuestions {
             quizPassed = true
-            let allChapters = MathChapter.allCases
-            if let currentIndex = allChapters.firstIndex(of: result.chapter) {
-                let currentUnlockedIndex = UserDefaults.standard.integer(forKey: "unlockedChapterIndex")
-                if currentIndex >= currentUnlockedIndex {
-                    UserDefaults.standard.set(currentIndex + 1, forKey: "unlockedChapterIndex")
-                }
-            }
+
+            // Add this chapter to completed chapters
+            var completedChapters = getCompletedChapters()
+            completedChapters.insert(result.chapter)
+            saveCompletedChapters(completedChapters)
+
+            // Notify that chapters may have been unlocked
+            NotificationCenter.default.post(name: .chapterUnlocked, object: nil)
         } else {
             quizPassed = false
         }
@@ -126,17 +149,17 @@ class QuizViewModel: ObservableObject {
         lastQuizResult = nil
     }
 
-    func startNextChapterQuiz() {
-        guard let lastResult = lastQuizResult else { return }
+    // Get available next chapters (newly unlocked chapters)
+    func getAvailableNextChapters() -> [MathChapter] {
+        guard let lastResult = lastQuizResult else { return [] }
 
-        let allChapters = MathChapter.allCases
-        if let currentIndex = allChapters.firstIndex(of: lastResult.chapter), currentIndex + 1 < allChapters.count {
-            let nextChapter = allChapters[currentIndex + 1]
-            startQuiz(chapter: nextChapter)
-        } else {
-            // Handle case where user has finished the last chapter
-            // For now, we can just reset the quiz
-            resetQuiz()
+        let completedChapters = getCompletedChapters()
+
+        // If the last quiz was passed, return the chapters it unlocks that haven't been completed yet
+        if lastResult.score == lastResult.totalQuestions {
+            return lastResult.chapter.unlocks.filter { !completedChapters.contains($0) }
         }
+
+        return []
     }
 }
