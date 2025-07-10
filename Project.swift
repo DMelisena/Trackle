@@ -22,6 +22,12 @@ let project = Project(
                 .external(name: "HotSwiftUI"),
                 // .external(name: "Inject"),
             ],
+            copyFiles: [
+                .sharedSupport(name: "HotSwiftUI"),
+            ],
+            embed: [
+                .external(name: "HotSwiftUI"),
+            ],
             settings: .settings(
                 base: [
                     "OTHER_LDFLAGS": [

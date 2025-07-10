@@ -77,3 +77,23 @@ struct MainTabView: View {
 
     
 }
+
+struct MainTabView_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            MainTabView()
+                .environmentObject(QuizViewModel())
+                .previewDisplayName("MainTabView")
+
+            MainTabView()
+                .environmentObject(QuizViewModel())
+                .preferredColorScheme(.dark)
+                .previewDisplayName("MainTabView - Dark")
+
+            MainTabView()
+                .environmentObject(QuizViewModel())
+                .previewDevice("iPhone SE (3rd generation)")
+                .previewDisplayName("MainTabView - iPhone SE")
+        }
+    }
+}

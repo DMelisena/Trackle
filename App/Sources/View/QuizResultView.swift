@@ -151,3 +151,75 @@ struct QuizResultView: View {
         return String(format: "%02d:%02d", minutes, seconds)
     }
 }
+
+// MARK: - QuizResultView Preview
+struct QuizResultView_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            QuizResultView()
+                .environmentObject({
+                    let viewModel = QuizViewModel()
+                    viewModel.lastQuizResult = QuizResult(
+                        userId: "preview-user",
+                        chapter: .algebra,
+                        score: 8,
+                        totalQuestions: 10,
+                        date: Date(),
+                        timeSpent: 120.0
+                    )
+                    viewModel.quizPassed = true
+                    return viewModel
+                }())
+                .previewDisplayName("QuizResultView - Passed")
+
+            QuizResultView()
+                .environmentObject({
+                    let viewModel = QuizViewModel()
+                    viewModel.lastQuizResult = QuizResult(
+                        userId: "preview-user",
+                        chapter: .calculus,
+                        score: 4,
+                        totalQuestions: 10,
+                        date: Date(),
+                        timeSpent: 85.0
+                    )
+                    viewModel.quizPassed = false
+                    return viewModel
+                }())
+                .previewDisplayName("QuizResultView - Failed")
+
+            QuizResultView()
+                .environmentObject({
+                    let viewModel = QuizViewModel()
+                    viewModel.lastQuizResult = QuizResult(
+                        userId: "preview-user",
+                        chapter: .trigonometry,
+                        score: 10,
+                        totalQuestions: 10,
+                        date: Date(),
+                        timeSpent: 180.0
+                    )
+                    viewModel.quizPassed = true
+                    return viewModel
+                }())
+                .previewDisplayName("QuizResultView - Perfect")
+
+            QuizResultView()
+                .environmentObject({
+                    let viewModel = QuizViewModel()
+                    viewModel.lastQuizResult = QuizResult(
+                        userId: "preview-user",
+                        chapter: .geometry,
+                        score: 7,
+                        totalQuestions: 10,
+                        date: Date(),
+                        timeSpent: 95.0
+                    )
+                    viewModel.quizPassed = true
+                    return viewModel
+                }())
+                .preferredColorScheme(.dark)
+                .previewDisplayName("QuizResultView - Dark Mode")
+        }
+    }
+}

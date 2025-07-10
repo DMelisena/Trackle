@@ -65,3 +65,51 @@ struct ChapterSelectionView: View {
 extension Notification.Name {
     static let chapterUnlocked = Notification.Name("chapterUnlocked")
 }
+
+// MARK: - ChapterSelectionView Preview
+struct ChapterSelectionView_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            ChapterSelectionView()
+                .environmentObject(QuizViewModel())
+                .previewDisplayName("ChapterSelectionView")
+            
+            ChapterSelectionView()
+                .environmentObject(QuizViewModel())
+                .onAppear {
+                    UserDefaults.standard.set(3, forKey: "unlockedChapterIndex")
+                }
+                .previewDisplayName("ChapterSelectionView - Progress")
+            
+            ChapterSelectionView()
+                .environmentObject(QuizViewModel())
+                .previewDevice("iPad Pro (12.9-inch) (6th generation)")
+                .previewDisplayName("ChapterSelectionView - iPad")
+        }
+    }
+}
+//struct ChapterSelectionView_ProgressPreviews: PreviewProvider { //    static var previews: some View { //        Group {
+//            ChapterSelectionView()
+//                .environmentObject(QuizViewModel())
+//                .onAppear {
+//                    UserDefaults.standard.set(0, forKey: "unlockedChapterIndex")
+//                }
+//                .previewDisplayName("Just Started")
+//
+//            ChapterSelectionView()
+//                .environmentObject(QuizViewModel())
+//                .onAppear {
+//                    UserDefaults.standard.set(2, forKey: "unlockedChapterIndex")
+//                }
+//                .previewDisplayName("Mid Progress")
+//
+//            ChapterSelectionView()
+//                .environmentObject(QuizViewModel())
+//                .onAppear {
+//                    UserDefaults.standard.set(4, forKey: "unlockedChapterIndex")
+//                }
+//                .previewDisplayName("Almost Complete")
+//        }
+//    }
+//}
+

@@ -197,3 +197,10 @@ struct QuizView: View {
         return false
     }
 }
+
+#Preview {
+    let quizViewModel = QuizViewModel()
+    quizViewModel.startQuiz(chapter: .algebra)
+    return QuizView()
+        .environmentObject(quizViewModel)
+}

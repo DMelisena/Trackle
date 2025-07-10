@@ -66,3 +66,18 @@ struct QuizSelectionView: View {
         }
     }
 }
+
+struct QuizSelectionView_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            QuizSelectionView()
+                .environmentObject(QuizViewModel())
+                .previewDisplayName("QuizSelectionView")
+
+            QuizSelectionView()
+                .environmentObject(QuizViewModel())
+                .preferredColorScheme(.dark)
+                .previewDisplayName("QuizSelectionView - Dark")
+        }
+    }
+}
